@@ -23,11 +23,13 @@ var smtpTransport = nodemailer.createTransport("SMTP",{
 });
 
 var initial_followers = 0;
+var timer = 30 * 60 * 1000;
 
 
 function testFollowers() {
     twit.showUser('isai_fr', function(err, data) {
         var count = data[0].followers_count;
+        console.log("JCD tested with count=",count);
         if (count != initial_followers) {
             smtpTransport.sendMail({
                 from: "Twitter Test App <zellnologger@gmail.com>", // sender address
@@ -42,8 +44,14 @@ function testFollowers() {
                 }
             });
             initial_followers = count;
+            timer = Math.max(0,(8999 - count) * 60 * 1000);
+            console.log("Interval updated to ",timer/60/1000);
         }
     });
+}
+
+function start() {
+    setInterval(testFollowers, timer);
 }
 
 testFollowers();
